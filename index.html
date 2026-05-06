@@ -3,175 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أيتـن Aytin - نظام الإدارة</title>
+    <title>أيتن - الإدارة الذكية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
     <style>
-        :root {
-            --primary: #c25983; /* لون أيتن */
-            --light-pink: #fce4ec;
-            --white: #ffffff;
-            --bg: #f8f9fa;
-        }
-
+        :root { --p: #c25983; --pl: #fce4ec; --s: #4a148c; --bg: #fdfafb; }
         * { box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
-
-        /* Header */
-        header {
-            background: var(--white);
-            padding: 15px;
-            text-align: center;
-            border-bottom: 3px solid var(--primary);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        header img { height: 65px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 5px; }
-        header h1 { color: var(--primary); margin: 0; font-size: 24px; font-weight: 700; }
+        body { background: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
+        
+        header { background: #fff; padding: 15px; text-align: center; border-bottom: 3px solid var(--p); box-shadow: 0 4px 15px rgba(194, 89, 131, 0.1); position: sticky; top: 0; z-index: 100; }
+        header img { height: 55px; border-radius: 50%; border: 2px solid var(--p); margin-bottom: 5px; }
+        
+        .role-btn { position: absolute; top: 15px; left: 15px; font-size: 11px; background: var(--pl); padding: 5px 10px; border-radius: 20px; color: var(--p); font-weight: bold; cursor: pointer; border: 1px solid var(--p); }
 
         .container { padding: 15px; max-width: 500px; margin: auto; }
+        .card { background: #fff; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.04); border: 1px solid #fce4ec; }
+        .title { color: var(--p); font-weight: bold; font-size: 16px; margin-bottom: 15px; display: block; border-right: 4px solid var(--p); padding-right: 10px; }
         
-        /* كروت الأقسام */
-        .card {
-            background: var(--white);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-            border: 1px solid rgba(194, 89, 131, 0.1);
-        }
-        .section-title {
-            color: var(--primary);
-            font-weight: 700;
-            display: block;
-            margin-bottom: 15px;
-            border-right: 5px solid var(--primary);
-            padding-right: 10px;
-            font-size: 18px;
-        }
-
-        /* المدخلات والأزرار */
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            outline: none;
-            background: #fff;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 8px var(--light-pink); }
+        input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 10px; background: #fafafa; outline: none; transition: 0.3s; font-weight: bold; }
+        input:focus, select:focus { border-color: var(--p); background: #fff; box-shadow: 0 0 0 3px var(--pl); }
         
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .btn-sell { background-color: var(--primary); color: white; }
-        .btn-sell:active { transform: scale(0.95); }
-        .btn-pdf { background-color: #4a148c; color: white; margin-top: 10px; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; }
+        .btn-p { background: var(--p); color: #fff; }
+        .btn-out { background: #e74c3c; color: #fff; }
+        .btn-save { background: var(--s); color: #fff; margin-top: 15px; }
+        
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row > * { flex: 1; }
 
-        /* جداول اليومية */
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th { background: var(--light-pink); color: var(--primary); padding: 10px; text-align: right; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+        th { background: var(--pl); padding: 10px; text-align: right; color: var(--s); border-radius: 5px 5px 0 0; }
         td { padding: 10px; border-bottom: 1px solid #eee; }
 
-        /* شريط التنقل السفلي */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #fff;
-            display: flex;
-            box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
-            border-top: 1px solid #eee;
-            z-index: 1000;
-        }
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            padding: 15px;
-            color: #888;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); background: var(--light-pink); }
+        .stats { display: flex; justify-content: space-between; text-align: center; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 10px; border: 1px dashed var(--p); }
+        .stats div { flex: 1; }
+        .stats span { display: block; font-size: 18px; font-weight: bold; margin-top: 5px; }
 
+        .nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav div { flex: 1; text-align: center; padding: 15px; color: #aaa; font-weight: bold; cursor: pointer; }
+        .nav div.active { color: var(--p); border-top: 3px solid var(--p); background: var(--pl); }
+        
         .hidden { display: none; }
-        .stat-box { display: flex; justify-content: space-between; text-align: center; margin-bottom: 10px; }
-        .stat-box div { flex: 1; padding: 10px; background: var(--light-pink); margin: 5px; border-radius: 10px; }
-        .stat-box b { display: block; color: var(--primary); font-size: 18px; }
+        .low-stock { color: #e74c3c; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
-    <img src="icon.png" alt="لوجو أيتن" onerror="this.src='https://via.placeholder.com/65/c25983/ffffff?text=Ayten'">
-    <h1>براند أيتـن Aytin</h1>
+    <div class="role-btn" onclick="toggleRole()">لوحة الإدارة 🔒</div>
+    <img src="icon.png" alt="لوجو" onerror="this.src='https://via.placeholder.com/60/c25983/fff?text=A'">
+    <h2 style="margin:0; color:var(--p); font-size:20px;">أيتـن Aytin <span id="role-text" style="font-size:12px; color:#888;">(كاشير)</span></h2>
 </header>
 
 <div class="container">
-    <div id="pos-tab" class="tab-content">
+    
+    <div id="cashier-tab">
         <div class="card">
-            <span class="section-title">بيع قطعة جديدة 🛍️</span>
-            <label>اختر النوع:</label>
-            <select id="sale-select"></select>
-            <button class="btn-sell" onclick="processSale()">تأكيد البيع ✅</button>
+            <span class="title">تسجيل مبيعات 🛍️</span>
+            <select id="pos-model"></select>
+            <input type="number" id="pos-price" placeholder="سعر البيع الفعلي (مثال: 250)">
+            <button class="btn-p" onclick="sellItem()">تأكيد البيع وخصم القطعة</button>
         </div>
-        <div class="card">
-            <span class="section-title">المخزن الحالي</span>
-            <div id="stock-list"></div>
-        </div>
-    </div>
 
-    <div id="inv-tab" class="tab-content hidden">
         <div class="card">
-            <span class="section-title">إضافة أو تزويد بضاعة 📦</span>
-            <input type="text" id="inv-name" placeholder="اسم النوع (مثلاً: ماليزي)">
-            <input type="number" id="inv-price" placeholder="سعر البيع">
-            <input type="number" id="inv-qty" placeholder="الكمية المضافة">
-            <button class="btn-sell" onclick="updateInventory()">تحديث المخزن</button>
-        </div>
-    </div>
-
-    <div id="ledger-tab" class="tab-content hidden">
-        <div class="card">
-            <div class="stat-box">
-                <div>إجمالي النقدية<b id="day-total">0 ج</b></div>
-                <div>عدد القطع<b id="day-count">0</b></div>
+            <span class="title" style="color:#e74c3c; border-color:#e74c3c;">تسجيل خارج / مصروفات 💸</span>
+            <div class="flex-row">
+                <input type="text" id="out-desc" placeholder="البيان (غداء، شاي...)">
+                <input type="number" id="out-val" placeholder="المبلغ">
             </div>
-            <button class="btn-pdf" onclick="generatePDF()">📥 تحميل اليومية (PDF)</button>
+            <button class="btn-out" onclick="addExpense()">سجل مصروف (-)</button>
         </div>
+
         <div class="card">
-            <span class="section-title">مراجعة مبيعات اليوم</span>
-            <input type="date" id="ledger-date" onchange="fetchLedger()">
-            <table id="ledger-table">
-                <thead><tr><th>الصنف</th><th>السعر</th><th>الوقت</th></tr></thead>
+            <span class="title">يومية الوردية</span>
+            <div class="stats">
+                <div>مبيعات<br><span id="stat-in" style="color:#2ecc71">0</span></div>
+                <div>مصروفات<br><span id="stat-out" style="color:#e74c3c">0</span></div>
+                <div>الصافي<br><span id="stat-net" style="color:var(--s)">0</span></div>
+            </div>
+            <table>
+                <thead><tr><th>البيان</th><th>المبلغ</th><th>الوقت</th></tr></thead>
                 <tbody id="ledger-body"></tbody>
+            </table>
+            <button class="btn-save" onclick="saveShiftPDF()">📥 حفظ وتقفيل اليومية (PDF)</button>
+        </div>
+    </div>
+
+    <div id="admin-tab" class="hidden">
+        <div class="card" style="border:2px solid var(--s);">
+            <span class="title" style="color:var(--s); border-color:var(--s);">إضافة للمخزن 📦 (صلاحية مدير)</span>
+            <input type="text" id="adm-model" placeholder="اسم الموديل (مثال: طرحة سوري)">
+            <input type="number" id="adm-qty" placeholder="الكمية المراد إضافتها">
+            <button style="background:var(--s); color:#fff;" onclick="addStock()">إضافة للمخزن</button>
+        </div>
+
+        <div class="card">
+            <span class="title">جرد المخزن الحالي</span>
+            <table>
+                <thead><tr><th>الموديل</th><th>الكمية المتاحة</th></tr></thead>
+                <tbody id="stock-body"></tbody>
             </table>
         </div>
     </div>
+
 </div>
 
-<nav class="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('pos-tab', this)">البيع</div>
-    <div class="nav-item" onclick="switchTab('inv-tab', this)">المخزن</div>
-    <div class="nav-item" onclick="switchTab('ledger-tab', this)">اليومية</div>
+<nav class="nav">
+    <div class="active" id="nav-cashier" onclick="switchTab('cashier')">شاشة الموظف</div>
+    <div id="nav-admin" onclick="switchTab('admin')">المخزن (المدير)</div>
 </nav>
 
 <script type="module">
-    // ربط فايربيز (باستخدام بياناتك الحقيقية)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    const firebaseConfig = {
+    const config = {
         apiKey: "AIzaSyCZTnzsDjfQsdsUuzwkwK4h_zTbfQqKWgY",
         authDomain: "ayten-243b0.firebaseapp.com",
         projectId: "ayten-243b0",
@@ -181,124 +128,186 @@
         appId: "1:55093741825:web:c559c8ef92d9b6ee613300"
     };
 
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(config);
     const db = getDatabase(app);
 
-    // تبديل التبويبات
-    window.switchTab = (tabId, el) => {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-        document.getElementById(tabId).classList.remove('hidden');
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        el.classList.add('active');
-        if(tabId === 'ledger-tab') fetchLedger();
-    }
+    let isAdmin = false;
+    const todayDate = new Date().toISOString().split('T')[0];
 
-    // تزويد المخزن
-    window.updateInventory = () => {
-        const name = document.getElementById('inv-name').value;
-        const price = Number(document.getElementById('inv-price').value);
-        const qty = Number(document.getElementById('inv-qty').value);
-        if(!name || !price || !qty) return alert("دخل البيانات كاملة يا بطل!");
+    // تبديل الصلاحيات
+    window.toggleRole = () => {
+        if(!isAdmin) {
+            let pass = prompt("برجاء إدخال باسورد الإدارة:");
+            if(pass === "12345") { // باسوورد المدير
+                isAdmin = true;
+                document.getElementById('role-text').innerText = "(مدير)";
+                alert("تم تسجيل الدخول كمدير. يمكنك الآن تعديل المخزن.");
+            } else { alert("باسوورد خاطئ!"); }
+        } else {
+            isAdmin = false;
+            document.getElementById('role-text').innerText = "(كاشير)";
+            switchTab('cashier');
+            alert("تم العودة لوضع الكاشير.");
+        }
+    };
 
-        update(ref(db, 'inventory/' + name), {
-            name, price, stock: increment(qty)
+    window.switchTab = (tab) => {
+        if(tab === 'admin' && !isAdmin) return alert("لازم تسجل كمدير الأول من الزرار اللي فوق 🔒");
+        document.getElementById('cashier-tab').classList.toggle('hidden', tab !== 'cashier');
+        document.getElementById('admin-tab').classList.toggle('hidden', tab !== 'admin');
+        document.getElementById('nav-cashier').classList.toggle('active', tab === 'cashier');
+        document.getElementById('nav-admin').classList.toggle('active', tab === 'admin');
+    };
+
+    // 1. الإدمن: إضافة كميات
+    window.addStock = () => {
+        const model = document.getElementById('adm-model').value.trim();
+        const qty = Number(document.getElementById('adm-qty').value);
+        if(!model || !qty) return alert("برجاء كتابة الموديل والكمية!");
+
+        update(ref(db, 'inventory/' + model), {
+            name: model, stock: increment(qty)
         }).then(() => {
-            alert("تم تحديث المخزن!");
-            document.getElementById('inv-name').value = '';
-            document.getElementById('inv-price').value = '';
-            document.getElementById('inv-qty').value = '';
+            alert("تم إضافة البضاعة للمخزن بنجاح!");
+            document.getElementById('adm-model').value = '';
+            document.getElementById('adm-qty').value = '';
         });
-    }
+    };
 
-    // عرض المخزن لحظياً
+    // جلب المخزن (للبيع والجرد)
     onValue(ref(db, 'inventory'), (snap) => {
         const data = snap.val();
-        const sel = document.getElementById('sale-select');
-        const list = document.getElementById('stock-list');
-        sel.innerHTML = '<option value="">-- اختر صنف --</option>';
-        list.innerHTML = '';
-        for(let id in data) {
-            if(data[id].stock > 0) sel.innerHTML += `<option value="${id}" data-p="${data[id].price}">${data[id].name}</option>`;
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>${data[id].name}</span>
-                <b style="color:${data[id].stock < 5 ? 'red':'green'}">${data[id].stock} قطعة</b>
-            </div>`;
+        const sel = document.getElementById('pos-model');
+        const sBody = document.getElementById('stock-body');
+        
+        sel.innerHTML = '<option value="">-- اختر الموديل --</option>';
+        sBody.innerHTML = '';
+        
+        if(data) {
+            for(let key in data) {
+                // الكاشير بيشوف اللي فيه رصيد بس
+                if(data[key].stock > 0) {
+                    sel.innerHTML += `<option value="${key}">${data[key].name}</option>`;
+                }
+                // الإدمن بيشوف الجرد كله مع تحذير النواقص
+                const stockClass = data[key].stock < 5 ? 'low-stock' : '';
+                sBody.innerHTML += `<tr>
+                    <td>${data[key].name}</td>
+                    <td class="${stockClass}">${data[key].stock} قطعة</td>
+                </tr>`;
+            }
         }
     });
 
-    // تسجيل بيع
-    window.processSale = () => {
-        const sel = document.getElementById('sale-select');
-        if(!sel.value) return alert("اختر طرحة الأول!");
-        const name = sel.options[sel.selectedIndex].text;
-        const price = Number(sel.options[sel.selectedIndex].getAttribute('data-p'));
-        
-        const now = new Date();
-        const dateKey = now.toISOString().split('T')[0];
-        const time = now.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    // 2. الكاشير: بيع قطعة (السعر يدوي)
+    window.sellItem = () => {
+        const sel = document.getElementById('pos-model');
+        const price = Number(document.getElementById('pos-price').value);
+        if(!sel.value) return alert("اختر الموديل الأول!");
+        if(!price || price <= 0) return alert("اكتب سعر البيع صح!");
 
-        push(ref(db, `sales/${dateKey}`), { name, price, time });
+        const name = "بيع: " + sel.options[sel.selectedIndex].text;
+        const time = new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+
+        // إضافة لليومية
+        push(ref(db, `ledgers/${todayDate}`), { title: name, amount: price, type: 'in', time });
+        // خصم من المخزن
         update(ref(db, `inventory/${sel.value}`), { stock: increment(-1) });
-        alert("بيعة مبروكة! تم الخصم من المخزن.");
-    }
+        
+        document.getElementById('pos-price').value = '';
+        alert("تم البيع وخصم القطعة من المخزن!");
+    };
 
-    // جلب اليومية
-    window.fetchLedger = () => {
-        const date = document.getElementById('ledger-date').value || new Date().toISOString().split('T')[0];
-        onValue(ref(db, `sales/${date}`), (snap) => {
-            const data = snap.val();
-            const body = document.getElementById('ledger-body');
-            let total = 0, count = 0; body.innerHTML = '';
-            for(let id in data) {
-                total += data[id].price; count++;
-                body.innerHTML += `<tr><td>${data[id].name}</td><td>${data[id].price} ج</td><td>${data[id].time}</td></tr>`;
+    // 3. الكاشير: تسجيل خارج
+    window.addExpense = () => {
+        const desc = document.getElementById('out-desc').value.trim();
+        const val = Number(document.getElementById('out-val').value);
+        if(!desc || !val) return alert("اكتب البيان والمبلغ!");
+
+        const title = "مصروف: " + desc;
+        const time = new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+
+        push(ref(db, `ledgers/${todayDate}`), { title: title, amount: -Math.abs(val), type: 'out', time });
+        
+        document.getElementById('out-desc').value = '';
+        document.getElementById('out-val').value = '';
+    };
+
+    // جلب اليومية وحساب الصافي
+    onValue(ref(db, `ledgers/${todayDate}`), (snap) => {
+        const data = snap.val();
+        const body = document.getElementById('ledger-body');
+        let totalIn = 0, totalOut = 0;
+        body.innerHTML = '';
+        
+        if(data) {
+            for(let key in data) {
+                const entry = data[key];
+                if(entry.amount > 0) totalIn += entry.amount;
+                else totalOut += Math.abs(entry.amount);
+
+                const color = entry.amount > 0 ? '#2ecc71' : '#e74c3c';
+                body.innerHTML += `<tr>
+                    <td>${entry.title}</td>
+                    <td style="color:${color}; font-weight:bold;">${Math.abs(entry.amount)}</td>
+                    <td style="font-size:11px; color:#888;">${entry.time}</td>
+                </tr>`;
             }
-            document.getElementById('day-total').innerText = total + " ج";
-            document.getElementById('day-count').innerText = count;
-        });
-    }
+        }
+        
+        document.getElementById('stat-in').innerText = totalIn + " ج";
+        document.getElementById('stat-out').innerText = totalOut + " ج";
+        document.getElementById('stat-net').innerText = (totalIn - totalOut) + " ج";
+    });
 
-    // استخراج الـ PDF مع اللوجو دائري
-    window.generatePDF = () => {
+    // 4. استخراج التقرير وتقفيل اليومية
+    window.saveShiftPDF = () => {
+        if(!confirm("هتطبع يومية الوردية دلوقتي؟")) return;
+        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const date = document.getElementById('ledger-date').value || new Date().toISOString().split('T')[0];
+        
+        // إعداد الخطوط والألوان
+        doc.setFontSize(22);
+        doc.setTextColor(194, 89, 131); // لون أيتن
+        doc.text("Aytin Daily Shift Report", 105, 20, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.setTextColor(50);
+        doc.text(`Date: ${todayDate}`, 105, 30, { align: 'center' });
 
-        doc.setFontSize(20);
-        doc.setTextColor(194, 89, 131);
-        doc.text("يومية مبيعات أيتـن Aytin", 105, 20, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(`تاريخ اليومية: ${date}`, 105, 30, { align: 'center' });
-
+        // تجميع الداتا للجدول
         const rows = [];
         document.querySelectorAll('#ledger-body tr').forEach(tr => {
             const tds = tr.querySelectorAll('td');
-            rows.push([tds[2].innerText, tds[1].innerText, tds[0].innerText]);
+            rows.push([tds[2].innerText, tds[1].innerText, tds[0].innerText]); // الوقت، المبلغ، البيان
         });
 
         doc.autoTable({
-            head: [['الوقت', 'السعر', 'الصنف']],
+            head: [['Time', 'Amount (EGP)', 'Description']],
             body: rows,
             startY: 40,
-            theme: 'striped',
+            theme: 'grid',
             headStyles: { fillColor: [194, 89, 131] },
-            styles: { halign: 'right' }
+            styles: { halign: 'right' } // المحاذاة يمين عشان العربي لو موجود
         });
 
-        // إضافة اللوجو دائري أسفل اليسار
+        // طباعة الإجماليات في آخر الصفحة
+        const finalY = doc.lastAutoTable.finalY + 15;
+        const net = document.getElementById('stat-net').innerText;
+        doc.setFontSize(16);
+        doc.setTextColor(74, 20, 140);
+        doc.text(`Net Cash (الصافي): ${net}`, 190, finalY, { align: 'right' });
+
+        // لوجو المحل
         const img = new Image();
         img.src = 'icon.png';
         img.onload = function() {
-            const pageHeight = doc.internal.pageSize.height;
-            doc.setDrawColor(194, 89, 131);
-            doc.circle(25, pageHeight - 25, 15, 'S'); // دائرة
-            try {
-                doc.addImage(img, 'PNG', 12, pageHeight - 38, 26, 26);
-            } catch(e) {}
-            doc.save(`Ayten_Report_${date}.pdf`);
+            doc.addImage(img, 'PNG', 15, finalY - 10, 25, 25);
+            doc.save(`Aytin_Shift_${todayDate}.pdf`);
         };
-        if(!img.complete) doc.save(`Ayten_Report_${date}.pdf`);
-    }
+        if(!img.complete) doc.save(`Aytin_Shift_${todayDate}.pdf`);
+    };
 </script>
 </body>
 </html>
