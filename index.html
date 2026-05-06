@@ -1,0 +1,141 @@
+<script type="module">
+    // استدعاء مكتبات فايربيز الأساسية وقاعدة البيانات
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // استدعاء الـ Analytics (اختياري بس مفيد جداً للإحصائيات)
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+    // بيانات مشروعك (اللي إنت بعتها)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZTnzsDjfQsdsUuzwkwK4h_zTbfQqKWgY",
+      authDomain: "ayten-243b0.firebaseapp.com",
+      projectId: "ayten-243b0",
+      storageBucket: "ayten-243b0.firebasestorage.app",
+      messagingSenderId: "55093741825",
+      appId: "1:55093741825:web:c559c8ef92d9b6ee613300",
+      measurementId: "G-X1GSRPC17J"
+    };
+
+    // تشغيل فايربيز
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase(app); // ربط قاعدة البيانات Realtime
+
+    // --- التبديل بين التبويبات ---
+    window.showTab = (id, el) => {
+        document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(id === 'ledger-sec') loadLedger();
+    };
+
+    // --- إدارة المخزن (إضافة وتزويد) ---
+    window.handleUpdateInventory = () => {
+        const name = document.getElementById('inv-name').value;
+        const price = Number(document.getElementById('inv-price').value);
+        const qty = Number(document.getElementById('inv-qty').value);
+        if(!name || !price) return alert("برجاء إدخال اسم الصنف والسعر");
+
+        // استخدام تحديث المخزون بحيث لو الصنف موجود يزود عليه، لو مش موجود يكريته
+        const itemRef = ref(db, 'inventory/' + name);
+        update(itemRef, {
+            name: name,
+            price: price,
+            stock: increment(qty) // بتزود الكمية الجديدة على القديمة
+        }).then(() => {
+            alert("تم تحديث المخزن بنجاح! 📦");
+            document.getElementById('inv-name').value = '';
+            document.getElementById('inv-price').value = '';
+            document.getElementById('inv-qty').value = '';
+        }).catch((error) => {
+            alert("حصلت مشكلة: " + error.message);
+        });
+    };
+
+    // --- جلب المخزن للـ POS (تحديث لحظي) ---
+    onValue(ref(db, 'inventory'), (snapshot) => {
+        const data = snapshot.val();
+        const select = document.getElementById('pos-select');
+        const list = document.getElementById('stock-list');
+        select.innerHTML = '';
+        list.innerHTML = '';
+        
+        if (data) {
+            for(let id in data) {
+                // إضافة الأصناف للقائمة المنسدلة
+                select.innerHTML += `<option value="${id}" data-price="${data[id].price}">${data[id].name} - ${data[id].price} ج.م (متاح: ${data[id].stock})</option>`;
+                
+                // إضافة الأصناف لقائمة العرض مع تلوين الكميات القليلة
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; padding-bottom:5px; border-bottom:1px dashed #eee;">
+                    <span>${data[id].name}</span>
+                    <span style="font-weight:bold; color:${data[id].stock < 5 ? 'red':'#4CAF50'}">${data[id].stock} قطعة</span>
+                </div>`;
+            }
+        } else {
+            list.innerHTML = "<p style='text-align:center; color:#888;'>المخزن فارغ حالياً</p>";
+        }
+    });
+
+    // --- عملية البيع ---
+    window.handleSale = () => {
+        const select = document.getElementById('pos-select');
+        if(!select.value) return alert("برجاء اختيار صنف للبيع");
+        
+        const id = select.value;
+        const price = Number(select.options[select.selectedIndex].getAttribute('data-price'));
+        // استخراج الاسم بدون القوسين بتوع الكمية
+        const name = select.options[select.selectedIndex].text.split('-')[0].trim();
+
+        const now = new Date();
+        const dateKey = now.toISOString().split('T')[0];
+        const time = now.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+
+        // 1. تسجيل البيعة في دفتر اليومية
+        const saleRef = ref(db, `sales/${dateKey}`);
+        push(saleRef, { name, price, time });
+
+        // 2. خصم قطعة من المخزن
+        update(ref(db, `inventory/${id}`), {
+            stock: increment(-1)
+        });
+        
+        // تأثير خفيف عشان تحس بالبيع
+        alert(`تم بيع ${name} بنجاح! 🛍️`);
+    };
+
+    // --- دفتر اليومية ---
+    window.loadLedger = () => {
+        const dateInput = document.getElementById('ledger-date').value;
+        const date = dateInput || new Date().toISOString().split('T')[0];
+        
+        onValue(ref(db, `sales/${date}`), (snapshot) => {
+            const data = snapshot.val();
+            const body = document.getElementById('ledger-body');
+            let total = 0, count = 0;
+            body.innerHTML = '';
+            
+            if (data) {
+                for(let id in data) {
+                    total += data[id].price;
+                    count++;
+                    body.innerHTML += `<tr>
+                        <td>${data[id].name}</td>
+                        <td style="font-weight:bold; color:var(--primary);">${data[id].price} ج.م</td>
+                        <td class="time-cell">${data[id].time}</td>
+                    </tr>`;
+                }
+            } else {
+                 body.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">لا توجد مبيعات في هذا اليوم</td></tr>`;
+            }
+            
+            document.getElementById('total-cash').innerText = total + " ج.م";
+            document.getElementById('total-items').innerText = count + " قطعة";
+        });
+    };
+
+    // تشغيل الـ Service Worker عشان الموبايل
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error:', err));
+    }
+</script>
