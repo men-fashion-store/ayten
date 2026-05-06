@@ -12,6 +12,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         :root { --p: #c25983; --pl: #fce4ec; --s: #4a148c; --bg: #fdfafb; --glass: rgba(255, 255, 255, 0.95); }
@@ -58,26 +59,16 @@
         #toast { visibility: hidden; min-width: 250px; background: rgba(51, 51, 51, 0.95); color: #fff; text-align: center; border-radius: 30px; padding: 12px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px); font-size: 14px; font-weight: bold; opacity: 0; transition: all 0.4s; }
         #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
         
-        /* =========================================================
-           إعدادات الطباعة للـ PDF (محمية ومفصولة تماماً عن الموقع)
-           ========================================================= */
-        @media print {
-            body { background: #fff !important; margin: 0; padding: 0; }
-            /* إخفاء كل الموقع وقت الطباعة */
-            header, .container, .nav, #toast { display: none !important; }
-            
-            /* إظهار ورقة الطباعة فقط */
-            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: #fff; color: #000; }
-            
-            .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .print-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
-            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            .print-table th, .print-table td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 12px; }
-            .print-table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
-            .print-total-box { border: 2px solid #000; padding: 12px; font-size: 16px; font-weight: bold; width: max-content; background: #fafafa !important; -webkit-print-color-adjust: exact; }
-            .print-footer { text-align: center; margin-top: 40px; color: #555; font-size: 12px; }
-            .print-logo { width: 50px; height: 50px; border-radius: 50%; border: 1px solid #ccc; display: block; margin: 10px auto; }
-        }
+        /* تصميم ورقة الـ PDF */
+        #print-area { position: absolute; top: 0; left: 0; width: 100%; min-height: 100vh; background: #fff; z-index: 10000; padding: 30px; color: #000; font-family: 'Tajawal', sans-serif; direction: rtl; }
+        .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .print-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .print-table th, .print-table td { border: 1px solid #ccc; padding: 10px; text-align: center; font-size: 13px; }
+        .print-table th { background: #f0f0f0; font-weight: bold; }
+        .print-total-box { border: 2px solid #000; padding: 12px 20px; font-size: 18px; font-weight: bold; width: fit-content; background: #fafafa; display: block; margin-right: auto; }
+        .print-footer { text-align: center; margin-top: 50px; color: #555; font-size: 13px; }
+        .print-logo { width: 70px; height: 70px; border-radius: 50%; border: 1px solid #ccc; display: block; margin: 15px auto; }
     </style>
 </head>
 <body>
@@ -86,8 +77,8 @@
 
 <div id="print-area" class="hidden">
     <div class="print-header">
-        <h1 style="margin: 0; font-size: 22px;">محلات أيتـن للطرح والكارينا</h1>
-        <p style="margin: 5px 0 0 0; font-size: 14px; color: #555;">كشف حساب وردية مفصل</p>
+        <h1 style="margin: 0; font-size: 24px; color:#c25983;">محلات أيتـن للطرح والكارينا</h1>
+        <p style="margin: 5px 0 0 0; font-size: 15px; color: #555;">كشف حساب وردية مفصل</p>
     </div>
     <div class="print-info">
         <div id="p-date">التاريخ: </div>
@@ -108,8 +99,8 @@
     
     <div class="print-footer">
         <p>شكراً لتعاملكم معنا - إدارة محلات أيتن</p>
-        <p>تم إصدار هذا الكشف آلياً</p>
-        <img src="icon.png" class="print-logo" alt="لوجو أيتن">
+        <p>تم إصدار هذا الكشف آلياً - Aytin POS</p>
+        <img src="icon.png" class="print-logo" alt="لوجو أيتن" onerror="this.style.display='none'">
     </div>
 </div>
 
@@ -135,7 +126,7 @@
         <div class="card">
             <span class="title" style="color:#e74c3c; border-color:#e74c3c;">المصروفات 💸</span>
             <div class="flex-row">
-                <input type="text" id="out-desc" placeholder="البيان">
+                <input type="text" id="out-desc" placeholder="البيان (ضيافة، شحن...)">
                 <input type="number" id="out-val" placeholder="المبلغ">
             </div>
             <button class="btn-out" onclick="addExpense()">سجل مصروف (-)</button>
@@ -152,7 +143,7 @@
                 <thead><tr><th>البيان</th><th>المبلغ</th><th>الوقت</th></tr></thead>
                 <tbody id="ledger-body"></tbody>
             </table>
-            <button class="btn-save" onclick="triggerPrintAndReset()">📥 حفظ الـ PDF وتصفير الوردية</button>
+            <button class="btn-save" onclick="triggerPrintAndReset()">📥 تحميل كشف الـ PDF وتصفير اليومية</button>
         </div>
     </div>
 
@@ -320,7 +311,7 @@
             title: `[قطعة] ${modelName}`, amount: totalPrice, type: 'in', time: time, model: modelName, qty: qty, pricePerPiece: pricePerPiece 
         });
         update(ref(db, `inventory/${sel.value}`), { stock: increment(-qty) });
-        showToast(`تم بيع ${qty} قطعة وتسجيلها في اليومية`);
+        showToast(`تم تسجيل البيع بنجاح`);
         document.getElementById('pos-price').value = ''; document.getElementById('pos-qty').value = '1';
     };
 
@@ -378,11 +369,9 @@
         const sel = document.getElementById('archive-select');
         sel.innerHTML = '<option value="">-- اختر وردية قديمة --</option>';
         if(archivesData) {
-            // ترتيب الأرشيف من الأحدث للأقدم
             const keys = Object.keys(archivesData).sort().reverse();
             for(let key of keys) {
-                // شكل التاريخ في الاختيارات
-                const displayKey = key.replace('_Shift_', ' | وقت التقفيل: ').replace(/-/g, '/');
+                const displayKey = key.replace('_Shift_', ' | تقفيل: ').replace(/-/g, ':');
                 sel.innerHTML += `<option value="${key}">${displayKey}</option>`;
             }
         }
@@ -411,11 +400,13 @@
         document.getElementById('archive-net').innerText = `${net} ج.م`;
     };
 
-    // ---------------- الطباعة والتقفيل ----------------
+    // ---------------- التحميل والتقفيل (بدون نافذة طباعة) ----------------
     window.triggerPrintAndReset = () => {
-        if(!currentShiftData) return showToast("الوردية فارغة، مفيش حاجة تتحفظ!", "error");
+        if(!currentShiftData) return showToast("مفيش مبيعات أو مصروفات عشان تتقفل!", "error");
         
-        // 1. تجهيز ورقة الطباعة
+        showToast("جاري تجهيز الـ PDF للتحميل المباشر...");
+        
+        // تجهيز الفاتورة
         document.getElementById('p-date').innerText = `التاريخ: ${displayDate}`;
         const pBody = document.getElementById('p-tbody');
         pBody.innerHTML = '';
@@ -435,28 +426,37 @@
         }
         document.getElementById('p-total').innerText = `الإجمالي الصافي: ${document.getElementById('stat-net').innerText} ج.م`;
         
-        // 2. إظهار ورقة الطباعة واستدعاء أمر الطباعة الخاص بالمتصفح
+        // إظهار الفاتورة عشان تتصور
         const printArea = document.getElementById('print-area');
         printArea.classList.remove('hidden');
         
-        setTimeout(() => {
-            window.print();
+        // إعدادات مكتبة التحميل المباشر
+        const opt = {
+            margin:       [5, 5, 5, 5],
+            filename:     `Aytin_Shift_${Date.now()}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // تحويل لـ PDF وتحميله
+        html2pdf().set(opt).from(printArea).save().then(() => {
+            printArea.classList.add('hidden'); // نخفي الفاتورة تاني
             
-            // 3. رسالة تأكيد الأرشفة بعد إغلاق نافذة الطباعة
-            setTimeout(() => {
-                printArea.classList.add('hidden');
+            // التأكيد الأخير عشان نصفر الوردية
+            if(confirm("تم تنزيل ملف الـ PDF بنجاح في التنزيلات. هل تريد تصفير الشاشة الآن لبدء وردية جديدة؟")) {
+                const shiftId = new Date().toLocaleTimeString('en-GB').replace(/:/g, '-');
                 
-                if(confirm("هل تم حفظ الـ PDF بنجاح لترحيل وتصفير الوردية؟ (اضغط OK لتصفير الشاشة)")) {
-                    const shiftId = new Date().toLocaleTimeString('ar-EG', {hour12:false}).replace(/:/g, '-');
-                    
-                    set(ref(db, `archives/${todayDate}_Shift_${shiftId}`), currentShiftData).then(() => {
-                        remove(ref(db, `ledgers/${todayDate}`)).then(() => { 
-                            showToast("تم ترحيل الوردية بنجاح للأرشيف!"); 
-                        });
+                set(ref(db, `archives/${todayDate}_Shift_${shiftId}`), currentShiftData).then(() => {
+                    remove(ref(db, `ledgers/${todayDate}`)).then(() => { 
+                        showToast("تم ترحيل الوردية للأرشيف بنجاح!"); 
                     });
-                }
-            }, 1000); 
-        }, 500); 
+                });
+            }
+        }).catch(err => {
+            printArea.classList.add('hidden');
+            showToast("حصلت مشكلة في التحميل، جرب تاني", "error");
+        });
     };
 </script>
 </body>
