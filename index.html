@@ -64,17 +64,17 @@
 
         /* ================= ستايل الطباعة الأصلية (Native Print) ================= */
         @media print {
-            body { background: #fff !important; margin: 0; padding: 0; }
+            body { background: #fff !important; margin: 0; padding: 0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             /* نخفي الموقع كله */
             header, .container, .nav, #toast, #loader { display: none !important; }
             
             /* نظهر الفاتورة بس */
-            #print-area { display: block !important; position: static !important; width: 100% !important; padding: 20px !important; background: #fff; color: #000; direction: rtl; font-family: 'Tajawal', sans-serif; }
+            #print-area { display: block !important; position: relative !important; width: 100% !important; padding: 20px !important; background: #fff; color: #000; direction: rtl; font-family: 'Tajawal', sans-serif; z-index: 1; overflow: hidden; }
             
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; z-index: 2; position: relative; }
             .print-table th, .print-table td { border: 1px solid #000 !important; padding: 10px; text-align: center; font-size: 14px; font-weight: 600; color: #000; }
             .print-table th { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            #p-total { background-color: #f0f0f0 !important; border: 2px solid #000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            #p-total { background-color: #f0f0f0 !important; border: 2px solid #000 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; position: relative; z-index: 2; }
         }
     </style>
 </head>
@@ -84,12 +84,15 @@
 <div id="loader" class="hidden"><div class="spinner"></div><h3 style="color:var(--p); font-weight:800;" id="loader-text">جاري المعالجة...</h3></div>
 
 <div id="print-area" class="hidden">
-    <div style="text-align: center; margin-bottom: 20px;">
+    <!-- العلامة المائية الشفافة في الخلفية -->
+    <img src="icon.png" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70%; max-width: 350px; opacity: 0.05; z-index: -1; pointer-events: none;" onerror="this.style.display='none'">
+
+    <div style="text-align: center; margin-bottom: 20px; position: relative; z-index: 2;">
         <h1 style="margin: 0; font-size: 26px; color: #000; font-weight: 800;">محلات أيتـن للطرح والكارينا</h1>
         <p style="margin: 5px 0 0 0; font-size: 15px; color: #333; font-weight:bold;">كشف حساب وردية مفصل</p>
     </div>
     
-    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 15px; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; position: relative; z-index: 2;">
         <span id="p-date">التاريخ: </span>
         <span>المسؤول: كاشير المحل</span>
     </div>
@@ -110,11 +113,12 @@
         صافي اليوميه : 0 ج.م
     </div>
     
-    <div style="margin-top: 40px; text-align: center; font-size: 14px; color: #555; position: relative; border-top: 1px dashed #000; padding-top: 15px; font-weight: 600;">
+    <div style="margin-top: 40px; text-align: center; font-size: 14px; color: #555; position: relative; border-top: 1px dashed #000; padding-top: 15px; font-weight: 600; z-index: 2;">
         <p>شكراً لتعاملكم معنا - إدارة محلات أيتن</p>
         <p>تم إصدار هذا الكشف آلياً</p>
         <p> مستر حماده فهيد </p>
-        <img src="icon.png" style="position: absolute; left: 10px; bottom: 0; width: 65px; height: 65px; border-radius: 50%; border: 1px solid #ddd;" onerror="this.style.display='none'">
+        <!-- اللوجو بتأثير 3D -->
+        <img src="icon.png" style="position: absolute; left: 10px; bottom: 0; width: 75px; height: 75px; border-radius: 50%; border: 2px solid var(--p, #c25983); box-shadow: 4px 6px 12px rgba(0,0,0,0.25), inset 2px 2px 8px rgba(255,255,255,0.7), inset -2px -2px 6px rgba(0,0,0,0.1); transform: perspective(300px) rotateY(15deg) rotateX(5deg);" onerror="this.style.display='none'">
     </div>
 </div>
 
@@ -456,7 +460,9 @@
                 <td style="font-weight:bold;">${Math.abs(entry.amount)} ج</td>
             </tr>`;
         }
-        document.getElementById('p-total').innerText = `الإجمالي المطلوب سداده: ${document.getElementById('stat-net').innerText} ج.م`;
+        
+        // تعديل الجملة هنا عشان تبقى "صافي الوردية" بدل "الإجمالي المطلوب سداده"
+        document.getElementById('p-total').innerText = `صافي الوردية: ${document.getElementById('stat-net').innerText} ج.م`;
         
         // 2. إظهار الفاتورة عشان الموبايل يشوفها
         const printArea = document.getElementById('print-area'); 
